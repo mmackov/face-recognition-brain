@@ -18,7 +18,7 @@ const FaceRecognition = ({ imageUrl, faceBoxes }) => {
   ));
 
   return (
-    <div className="center ma">
+    <div className="center-flex ma">
       <div className="absolute mt4">
         <img
           id="input-image"
