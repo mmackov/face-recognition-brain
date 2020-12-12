@@ -1,9 +1,0 @@
-.Tilt {
-  background: linear-gradient(89deg, #ff5edf 0%, #04c8de 100%);
-  display: grid;
-}
-
-.Tilt-inner {
-  justify-self: center;
-  align-self: center;
-}
