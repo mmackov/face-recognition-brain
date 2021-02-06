@@ -35,24 +35,54 @@ class App extends Component {
       faceBoxes: [],
       route: "signIn",
       isSignedIn: false,
+      user: {
+        id: '',
+        name: '',
+        email: '',
+        entries: 0,
+        joined: ''
+      }
     };
   }
 
   calculateFaceLocation = (data) => {
     const clarifaiFaces = data.outputs[0].data.regions;
-    const image = document.getElementById("input-image");
-    const width = Number(image.width);
-    const height = Number(image.height);
+    // Some faces have been found
+    if (clarifaiFaces) {
+      const image = document.getElementById("input-image");
+      const width = Number(image.width);
+      const height = Number(image.height);
 
-    return clarifaiFaces.map((face) => {
-      const boundingBox = face.region_info.bounding_box;
-      return {
-        leftCol: boundingBox.left_col * width,
-        topRow: boundingBox.top_row * height,
-        rightCol: width - boundingBox.right_col * width,
-        bottomRow: height - boundingBox.bottom_row * height,
-      };
-    });
+      // Increment the user's successful entries
+      this.updateUserEntries();
+      
+      return clarifaiFaces.map((face) => {
+        const boundingBox = face.region_info.bounding_box;
+        return {
+          leftCol: boundingBox.left_col * width,
+          topRow: boundingBox.top_row * height,
+          rightCol: width - boundingBox.right_col * width,
+          bottomRow: height - boundingBox.bottom_row * height,
+        };
+      });
+    } else {
+      // No faces found so return empty array (no boxes)
+      return [];
+    }
+  };
+
+  updateUserEntries = () => {
+    fetch(`http://localhost:3000/image/${this.state.user.id}`)
+      .then(response => {
+        if (response.status !== 404) {
+          this.setState({
+            user: {
+              ...this.state.user,
+              entries: this.state.user.entries + 1
+            }
+          });
+        }
+      });
   };
 
   displayFaceBox = (faceBoxes) => {
@@ -70,7 +100,9 @@ class App extends Component {
       .then((response) =>
         this.displayFaceBox(this.calculateFaceLocation(response))
       )
-      .catch((error) => console.log(error));
+      .catch((error) => {
+        console.log(error)
+      });
   };
 
   onRouteChange = (route) => {
@@ -81,6 +113,10 @@ class App extends Component {
     }
     this.setState({ route: route });
   };
+
+  loadUser = (user) => {
+    this.setState({ user: user });
+  }
 
   render() {
     const { isSignedIn, imageUrl, route, faceBoxes } = this.state;
@@ -94,7 +130,7 @@ class App extends Component {
         { route === "home"
           ? <div>
               <Logo />
-              <Rank />
+              <Rank name={this.state.user.name} entries={this.state.user.entries} />
               <ImageLinkForm
                 onInputChange={this.onInputChange}
                 onSubmit={this.onSubmit}
@@ -105,9 +141,9 @@ class App extends Component {
               />
             </div>
           : (
-              route === "signIn"
-              ? <SignIn onRouteChange={this.onRouteChange} />
-              : <Register onRouteChange={this.onRouteChange} />
+              route === "signIn" || route === "signOut"
+              ? <SignIn loadUser={this.loadUser} onRouteChange={this.onRouteChange} />
+              : <Register loadUser={this.loadUser} onRouteChange={this.onRouteChange} />
             )
         }
       </div>
