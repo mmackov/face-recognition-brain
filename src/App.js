@@ -53,7 +53,7 @@ class App extends Component {
       const width = Number(image.width);
       const height = Number(image.height);
 
-      // Increment the user's successful entries
+      // Increment the user's successful entries only if faces have been found
       this.updateUserEntries();
       
       return clarifaiFaces.map((face) => {
@@ -72,15 +72,17 @@ class App extends Component {
   };
 
   updateUserEntries = () => {
-    fetch(`http://localhost:3000/image/${this.state.user.id}`)
-      .then(response => {
-        if (response.status !== 404) {
-          this.setState({
-            user: {
-              ...this.state.user,
-              entries: this.state.user.entries + 1
-            }
-          });
+    fetch('http://localhost:3000/image', {
+      method: 'put',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        id: this.state.user.id
+      })
+    })
+      .then(response => response.json())
+      .then(count => {
+        if (count !== 'User not found') {
+          this.setState(Object.assign(this.state.user, { entries: count}));
         }
       });
   };
@@ -97,11 +99,11 @@ class App extends Component {
     this.setState({ imageUrl: this.state.input });
     app.models
       .predict(Clarifai.FACE_DETECT_MODEL, this.state.input)
-      .then((response) =>
-        this.displayFaceBox(this.calculateFaceLocation(response))
-      )
+      .then((response) => {
+        this.displayFaceBox(this.calculateFaceLocation(response));
+      })
       .catch((error) => {
-        console.log(error)
+        console.log(error);
       });
   };
 
@@ -115,7 +117,7 @@ class App extends Component {
   };
 
   loadUser = (user) => {
-    this.setState({ user: user });
+    this.setState({ user: user, imageUrl: "" });
   }
 
   render() {
