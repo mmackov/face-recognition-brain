@@ -1,6 +1,5 @@
 import React, { Component } from "react";
 import Particles from "react-particles-js";
-import Clarifai from "clarifai";
 import Navigation from "./components/Navigation/Navigation";
 import Logo from "./components/Logo/Logo";
 import Rank from "./components/Rank/Rank";
@@ -21,10 +20,6 @@ const particlesOptions = {
     },
   },
 };
-
-const app = new Clarifai.App({
-  apiKey: "3868ac5ce83a436b8b955bd53300e441",
-});
 
 const initialState = {
   input: "",
@@ -100,14 +95,20 @@ class App extends Component {
 
   onSubmit = () => {
     this.setState({ imageUrl: this.state.input });
-    app.models
-      .predict(Clarifai.FACE_DETECT_MODEL, this.state.input)
-      .then((response) => {
-        this.displayFaceBox(this.calculateFaceLocation(response));
+    fetch('http://localhost:3000/image-url', {
+      method: 'post',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        imageUrl: this.state.imageUrl
       })
-      .catch((error) => {
-        console.log(error);
-      });
+    })
+    .then(response => response.json())
+    .then((response) => {
+      this.displayFaceBox(this.calculateFaceLocation(response));
+    })
+    .catch((error) => {
+      console.log(error);
+    });
   };
 
   onRouteChange = (route) => {
