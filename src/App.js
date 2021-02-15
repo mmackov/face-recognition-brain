@@ -7,6 +7,7 @@ import ImageLinkForm from "./components/ImageLinkForm/ImageLinkForm";
 import FaceRecognition from "./components/FaceRecognition/FaceRecognition";
 import SignIn from "./components/SignIn/SignIn";
 import Register from "./components/Register/Register";
+import * as Constants from "./constants/constants";
 import "./App.css";
 
 const particlesOptions = {
@@ -69,7 +70,7 @@ class App extends Component {
   };
 
   updateUserEntries = () => {
-    fetch('http://localhost:3000/image', {
+    fetch(`${Constants.URL_BACKEND}/image`, {
       method: 'put',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
@@ -95,11 +96,11 @@ class App extends Component {
 
   onSubmit = () => {
     this.setState({ imageUrl: this.state.input });
-    fetch('http://localhost:3000/image-url', {
+    fetch(`${Constants.URL_BACKEND}/image-url`, {
       method: 'post',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
-        imageUrl: this.state.imageUrl
+        imageUrl: this.state.input
       })
     })
     .then(response => response.json())

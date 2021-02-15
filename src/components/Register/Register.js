@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import * as Constants from "../../constants/constants";
 
 class Register extends Component {
   constructor(props) {
@@ -19,7 +20,7 @@ class Register extends Component {
     this.setState({password: event.target.value})
   }
   onSumbitRegister = () => {
-    fetch('http://localhost:3000/register', {
+    fetch(`${Constants.URL_BACKEND}/register`, {
       method: 'post',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
