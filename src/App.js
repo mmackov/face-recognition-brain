@@ -3,6 +3,7 @@ import Particles from "react-particles-js";
 import Navigation from "./components/Navigation/Navigation";
 import Logo from "./components/Logo/Logo";
 import Rank from "./components/Rank/Rank";
+import FileUploader from "./components/FileUploader/FileUploader";
 import ImageLinkForm from "./components/ImageLinkForm/ImageLinkForm";
 import FaceRecognition from "./components/FaceRecognition/FaceRecognition";
 import SignIn from "./components/SignIn/SignIn";
@@ -94,22 +95,30 @@ class App extends Component {
     this.setState({ input: event.target.value });
   };
 
-  onSubmit = () => {
-    this.setState({ imageUrl: this.state.input });
-    fetch(`${Constants.URL_BACKEND}/image-url`, {
-      method: 'post',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        imageUrl: this.state.input
+  onSubmit = (base64, previewUrl) => {
+    if ((base64 && previewUrl) || this.state.input) {
+      if (base64 && previewUrl) {
+        console.log("PreviewUrl: " + previewUrl);
+        this.setState({ imageUrl: previewUrl });
+      } else {
+        this.setState({ imageUrl: this.state.input });
+      }
+      fetch(`${Constants.URL_BACKEND}/image-url`, {
+        method: 'post',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          imageUrl: base64 ? null : this.state.input,
+          base64: base64 ? base64 : null
+        })
       })
-    })
-    .then(response => response.json())
-    .then((response) => {
-      this.displayFaceBox(this.calculateFaceLocation(response));
-    })
-    .catch((error) => {
-      console.log(error);
-    });
+      .then(response => response.json())
+      .then((response) => {
+        this.displayFaceBox(this.calculateFaceLocation(response));
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    }
   };
 
   onRouteChange = (route) => {
@@ -138,6 +147,7 @@ class App extends Component {
           ? <div>
               <Logo />
               <Rank name={this.state.user.name} entries={this.state.user.entries} />
+              <FileUploader onSubmitBase64={this.onSubmit}/>
               <ImageLinkForm
                 onInputChange={this.onInputChange}
                 onSubmit={this.onSubmit}

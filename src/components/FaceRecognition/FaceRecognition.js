@@ -2,7 +2,7 @@ import React from "react";
 import "./FaceRecognition.css";
 
 const FaceRecognition = ({ imageUrl, faceBoxes }) => {
-  const imageStyle = imageUrl.startsWith("http")
+  const imageStyle = imageUrl.includes("http")
     ? "ba bw3 b--gold br3 shadow-5"
     : "";
   const boundingBoxes = faceBoxes.map((box) => (
