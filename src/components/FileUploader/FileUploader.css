@@ -1,0 +1,21 @@
+.dzu-dropzone {
+  margin: 0;
+  border: 8px solid gold;
+  border-radius: 10px;
+}
+
+.dzu-submitButton {
+  background-color: #a463f2;
+  font-family: "Courrier New", Courrier, monospace;
+  transition: all 0.2s ease-in-out;
+}
+
+.dzu-submitButton:hover {
+  transform: scale(1.1);
+}
+
+.dzu-inputLabel {
+  font-family: "Courrier New", Courrier, monospace;
+  font-weight: 600;
+  color: gold;
+}

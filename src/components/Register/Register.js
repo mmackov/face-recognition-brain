@@ -37,6 +37,12 @@ class Register extends Component {
         }
       })
   }
+  handleKeyPress = (event) => {      
+    // It triggers by pressing the enter key
+    if (event.key === "Enter") {
+      this.onSumbitRegister();
+    }
+  };
 
   render() {
     return (
@@ -67,6 +73,7 @@ class Register extends Component {
                   name="email-address"
                   id="email-address"
                   onChange={this.onEmailChange}
+                  onKeyPress={this.handleKeyPress}
                 />
               </div>
               <div className="mv3">
@@ -79,15 +86,17 @@ class Register extends Component {
                   name="password"
                   id="password"
                   onChange={this.onPasswordChange}
+                  onKeyPress={this.handleKeyPress}
                 />
               </div>
             </fieldset>
             <div className="">
               <input
-                onClick={this.onSumbitRegister}
                 className="b ph3 pv2 input-reset ba b--black bg-transparent grow f6 dib pointer"
                 type="submit"
                 value="Register"
+                onClick={this.onSumbitRegister}
+                onKeyPress={this.handleKeyPress}
               />
             </div>
           </div>

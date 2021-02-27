@@ -3,7 +3,6 @@ import Particles from "react-particles-js";
 import Navigation from "./components/Navigation/Navigation";
 import Logo from "./components/Logo/Logo";
 import Rank from "./components/Rank/Rank";
-import FileUploader from "./components/FileUploader/FileUploader";
 import ImageLinkForm from "./components/ImageLinkForm/ImageLinkForm";
 import FaceRecognition from "./components/FaceRecognition/FaceRecognition";
 import SignIn from "./components/SignIn/SignIn";
@@ -95,11 +94,10 @@ class App extends Component {
     this.setState({ input: event.target.value });
   };
 
-  onSubmit = (base64, previewUrl) => {
-    if ((base64 && previewUrl) || this.state.input) {
-      if (base64 && previewUrl) {
-        console.log("PreviewUrl: " + previewUrl);
-        this.setState({ imageUrl: previewUrl });
+  onSubmit = (base64) => {
+    if (base64 || this.state.input) {
+      if (base64) {
+        this.setState({ imageUrl: base64 });
       } else {
         this.setState({ imageUrl: this.state.input });
       }
@@ -145,9 +143,10 @@ class App extends Component {
         />
         { route === "home"
           ? <div>
-              <Logo />
-              <Rank name={this.state.user.name} entries={this.state.user.entries} />
-              <FileUploader onSubmitBase64={this.onSubmit}/>
+              <div className="items-center" style={{display: "grid", gridTemplateColumns: "1fr 2fr 1fr"}}>
+                <Logo />
+                <Rank name={this.state.user.name} entries={this.state.user.entries} />
+              </div>
               <ImageLinkForm
                 onInputChange={this.onInputChange}
                 onSubmit={this.onSubmit}

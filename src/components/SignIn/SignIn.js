@@ -32,6 +32,12 @@ class SignIn extends Component {
         }
       })
   }
+  handleKeyPress = (event) => {      
+    // It triggers by pressing the enter key
+    if (event.key === "Enter") {
+      this.onSumbitSignIn();
+    }
+  };
 
   render() {
     return (
@@ -50,6 +56,7 @@ class SignIn extends Component {
                   name="email-address"
                   id="email-address"
                   onChange={this.onEmailChange}
+                  onKeyPress={this.handleKeyPress}
                 />
               </div>
               <div className="mv3">
@@ -62,15 +69,16 @@ class SignIn extends Component {
                   name="password"
                   id="password"
                   onChange={this.onPasswordChange}
+                  onKeyPress={this.handleKeyPress}
                 />
               </div>
             </fieldset>
             <div className="">
               <input
-                onClick={this.onSumbitSignIn}
                 className="b ph3 pv2 input-reset ba b--black bg-transparent grow pointer f6 dib"
                 type="submit"
                 value="Sign in"
+                onClick={this.onSumbitSignIn}
               />
             </div>
             <div className="lh-copy mt3">
