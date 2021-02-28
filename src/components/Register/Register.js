@@ -1,4 +1,6 @@
 import React, { Component } from "react";
+import {toast} from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import * as Constants from "../../constants/constants";
 
 class Register extends Component {
@@ -9,6 +11,7 @@ class Register extends Component {
       email: '',
       password: ''
     }
+    toast.configure();
   }
   onNameChange = (event) => {
     this.setState({name: event.target.value})
@@ -18,6 +21,15 @@ class Register extends Component {
   }
   onPasswordChange = (event) => {
     this.setState({password: event.target.value})
+  }
+  canBeSubmitted() {
+    const { name, email, password } = this.state;
+    return (
+      name.length >= 1 &&
+      email.length >= 6 &&
+      new RegExp(Constants.EMAIL_REGEX).test(email) &&
+      password.length >= 6
+    );
   }
   onSumbitRegister = () => {
     fetch(`${Constants.URL_BACKEND}/register`, {
@@ -29,17 +41,23 @@ class Register extends Component {
         password: this.state.password
       })
     })
-      .then(response => response.json())
-      .then(user => {
-        if (user.id) {
-          this.props.loadUser(user);
-          this.props.onRouteChange("home");
-        }
-      })
+    .then(response => response.json())
+    .then(user => {
+      if (user.id) {
+        this.props.loadUser(user);
+        this.props.onRouteChange("home");
+      } else {
+        toast.error(user,
+        {position: toast.POSITION.TOP_CENTER});
+      }
+    })
+    .catch((error) => {
+      console.log(error);
+    });
   }
   handleKeyPress = (event) => {      
     // It triggers by pressing the enter key
-    if (event.key === "Enter") {
+    if (event.key === "Enter" && this.canBeSubmitted()) {
       this.onSumbitRegister();
     }
   };
@@ -60,6 +78,9 @@ class Register extends Component {
                   type="text"
                   name="name"
                   id="name"
+                  required
+                  pattern=".{1,}"
+                  title="Required 1 or more characters"
                   onChange={this.onNameChange}
                 />
               </div>
@@ -72,6 +93,9 @@ class Register extends Component {
                   type="email"
                   name="email-address"
                   id="email-address"
+                  required
+                  pattern={Constants.EMAIL_REGEX}
+                  title="Must contain '@' and '.' with domain at least 2 characters"
                   onChange={this.onEmailChange}
                   onKeyPress={this.handleKeyPress}
                 />
@@ -85,6 +109,8 @@ class Register extends Component {
                   type="password"
                   name="password"
                   id="password"
+                  pattern=".{6,}"
+                  title="Required 6 or more characters"
                   onChange={this.onPasswordChange}
                   onKeyPress={this.handleKeyPress}
                 />
@@ -95,6 +121,7 @@ class Register extends Component {
                 className="b ph3 pv2 input-reset ba b--black bg-transparent grow f6 dib pointer"
                 type="submit"
                 value="Register"
+                disabled={!this.canBeSubmitted()}
                 onClick={this.onSumbitRegister}
                 onKeyPress={this.handleKeyPress}
               />

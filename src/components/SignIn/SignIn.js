@@ -1,40 +1,57 @@
 import React, { Component } from "react";
+import {toast} from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import * as Constants from "../../constants/constants";
 
 class SignIn extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      signInEmail: '',
-      signInPassword: ''
+      email: '',
+      password: ''
     }
+    toast.configure();
   }
   onEmailChange = (event) => {
-    this.setState({signInEmail: event.target.value})
+    this.setState({email: event.target.value})
   }
   onPasswordChange = (event) => {
-    this.setState({signInPassword: event.target.value})
+    this.setState({password: event.target.value})
+  }
+  canBeSubmitted() {
+    const { email, password } = this.state;
+    return (
+      email.length >= 6 &&
+      new RegExp(Constants.EMAIL_REGEX).test(email) &&
+      password.length >= 6
+    );
   }
   onSumbitSignIn = () => {
     fetch(`${Constants.URL_BACKEND}/signin`, {
       method: 'post',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
-        email: this.state.signInEmail,
-        password: this.state.signInPassword
+        email: this.state.email,
+        password: this.state.password
       })
     })
-      .then(response => response.json())
-      .then(user => {
-        if (user.id) {
-          this.props.loadUser(user);
-          this.props.onRouteChange("home");
-        }
-      })
+    .then(response => response.json())
+    .then(user => {
+      if (user.id) {
+        this.props.loadUser(user);
+        this.props.onRouteChange("home");
+      } else {
+        toast.error(user,
+        {position: toast.POSITION.TOP_CENTER});
+      }
+    })
+    .catch((error) => {
+      console.log(error);
+    });
   }
   handleKeyPress = (event) => {      
     // It triggers by pressing the enter key
-    if (event.key === "Enter") {
+    if (event.key === "Enter" && this.canBeSubmitted()) {
       this.onSumbitSignIn();
     }
   };
@@ -55,6 +72,9 @@ class SignIn extends Component {
                   type="email"
                   name="email-address"
                   id="email-address"
+                  required
+                  pattern={Constants.EMAIL_REGEX}
+                  title="Must contain '@' and '.' with domain at least 2 characters"
                   onChange={this.onEmailChange}
                   onKeyPress={this.handleKeyPress}
                 />
@@ -68,6 +88,9 @@ class SignIn extends Component {
                   type="password"
                   name="password"
                   id="password"
+                  required
+                  pattern=".{6,}"
+                  title="Required 6 or more characters"
                   onChange={this.onPasswordChange}
                   onKeyPress={this.handleKeyPress}
                 />
@@ -78,16 +101,9 @@ class SignIn extends Component {
                 className="b ph3 pv2 input-reset ba b--black bg-transparent grow pointer f6 dib"
                 type="submit"
                 value="Sign in"
+                disabled={!this.canBeSubmitted()}
                 onClick={this.onSumbitSignIn}
               />
-            </div>
-            <div className="lh-copy mt3">
-              <p
-                onClick={() => this.props.onRouteChange("register")}
-                className="f6 link dim black db pointer"
-              >
-                Register
-              </p>
             </div>
           </div>
         </main>
