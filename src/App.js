@@ -7,6 +7,8 @@ import ImageLinkForm from "./components/ImageLinkForm/ImageLinkForm";
 import FaceRecognition from "./components/FaceRecognition/FaceRecognition";
 import SignIn from "./components/SignIn/SignIn";
 import Register from "./components/Register/Register";
+import {toast} from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import * as Constants from "./constants/constants";
 import "./App.css";
 
@@ -32,6 +34,7 @@ const initialState = {
     name: '',
     email: '',
     entries: 0,
+    entriesSession: 0,
     joined: ''
   }
 };
@@ -40,31 +43,37 @@ class App extends Component {
   constructor() {
     super();
     this.state = initialState;
+    toast.configure();
   }
 
   calculateFaceLocation = (data) => {
-    const clarifaiFaces = data.outputs[0].data.regions;
-    // Some faces have been found
-    if (clarifaiFaces) {
-      const image = document.getElementById("input-image");
-      const width = Number(image.width);
-      const height = Number(image.height);
+    if (data.outputs) {
+      const clarifaiFaces = data.outputs[0].data.regions;
+      // Some faces have been found
+      if (clarifaiFaces) {
+        const image = document.getElementById("input-image");
+        const width = Number(image.width);
+        const height = Number(image.height);
 
-      // Increment the user's successful entries only if faces have been found
-      this.updateUserEntries();
-      
-      return clarifaiFaces.map((face) => {
-        const boundingBox = face.region_info.bounding_box;
-        return {
-          leftCol: boundingBox.left_col * width,
-          topRow: boundingBox.top_row * height,
-          rightCol: width - boundingBox.right_col * width,
-          bottomRow: height - boundingBox.bottom_row * height,
-        };
-      });
+        // Increment the user's successful entries only if faces have been found
+        this.updateUserEntries();
+        
+        return clarifaiFaces.map((face) => {
+          const boundingBox = face.region_info.bounding_box;
+          return {
+            leftCol: boundingBox.left_col * width,
+            topRow: boundingBox.top_row * height,
+            rightCol: width - boundingBox.right_col * width,
+            bottomRow: height - boundingBox.bottom_row * height,
+          };
+        });
+      } else {
+        // No faces found so return empty array (no boxes)
+        return [];
+      }
     } else {
-      // No faces found so return empty array (no boxes)
-      return [];
+      toast.error("Face detection faled!",
+        {position: toast.POSITION.TOP_RIGHT});
     }
   };
 
@@ -79,7 +88,10 @@ class App extends Component {
       .then(response => response.json())
       .then(count => {
         if (count !== 'User not found') {
-          this.setState(Object.assign(this.state.user, { entries: count}));
+          this.setState(Object.assign(this.state.user, 
+            { entries: count,
+              entriesSession: this.state.user.entriesSession + 1
+            }));
         }
       })
       .catch(console.log);
@@ -87,6 +99,17 @@ class App extends Component {
 
   displayFaceBox = (faceBoxes) => {
     this.setState({ faceBoxes: faceBoxes });
+    if (faceBoxes.length === 0) {
+      toast.info("No faces found",
+        { position: toast.POSITION.TOP_CENTER,
+          autoClose: Constants.TOAST_AUTO_CLOSE_LONG_MS
+        });
+    } else {
+      toast.success(`${faceBoxes.length} faces found`,
+        { position: toast.POSITION.TOP_CENTER,
+          autoClose: Constants.TOAST_AUTO_CLOSE_LONG_MS
+        });
+    }
   };
 
   onInputChange = (event) => {
@@ -126,7 +149,7 @@ class App extends Component {
   };
 
   loadUser = (user) => {
-    this.setState({ user: user });
+    this.setState(Object.assign(this.state.user, user));
   }
 
   render() {
@@ -142,7 +165,10 @@ class App extends Component {
           ? <div>
               <div className="items-center" style={{display: "grid", gridTemplateColumns: "1fr 2fr 1fr"}}>
                 <Logo />
-                <Rank name={this.state.user.name} entries={this.state.user.entries} />
+                <Rank
+                  name={this.state.user.name}
+                  entries={this.state.user.entries}
+                  entriesSession={this.state.user.entriesSession}/>
               </div>
               <ImageLinkForm
                 onInputChange={this.onInputChange}
