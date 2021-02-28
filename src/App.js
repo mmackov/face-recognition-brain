@@ -27,7 +27,6 @@ const initialState = {
   imageUrl: "",
   faceBoxes: [],
   route: "signIn",
-  isSignedIn: false,
   user: {
     id: '',
     name: '',
@@ -122,8 +121,6 @@ class App extends Component {
   onRouteChange = (route) => {
     if (route === "signOut") {
       this.setState(initialState);
-    } else if (route === "home") {
-      this.setState({ isSignedIn: true });
     }
     this.setState({ route: route });
   };
@@ -133,13 +130,13 @@ class App extends Component {
   }
 
   render() {
-    const { isSignedIn, imageUrl, route, faceBoxes } = this.state;
+    const { imageUrl, route, faceBoxes } = this.state;
     return (
       <div className="App">
         <Particles className="particles" params={particlesOptions} />
         <Navigation
           onRouteChange={this.onRouteChange}
-          isSignedIn={isSignedIn}
+          route={route}
         />
         { route === "home"
           ? <div>
